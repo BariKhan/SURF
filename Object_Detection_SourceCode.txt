@@ -1,0 +1,114 @@
+addpath('F:\ACADEMICS\Projects\TESTING');
+
+% addpath is used to select the directory of the files
+
+
+
+a = imread('1.jpg');
+% imread is image read, it is used to read the image from the directory.
+figure;
+imshow(a);
+%imshow=image show.
+title('Clock');
+a = rgb2gray(a);
+
+%rgb2gray(a) converts rgb to grayscale.
+
+b = imread('9.jpg');
+figure;
+imshow(b);
+title('Image of a Cluttered Scene');
+b = rgb2gray(b);
+
+clockPoints = detectSURFFeatures(a);
+scenePoints = detectSURFFeatures(b);
+
+% SURF= speeded up robust features.
+% detectSURFFeatures detects the robust features of an image.
+
+
+figure;
+imshow(a);
+title('100 Strongest Feature Points from Clock Image');
+hold on;
+plot(selectStrongest(clockPoints, 100));
+
+
+figure;
+imshow(b);
+title('300 Strongest Feature Points from Scene Image');
+hold on;
+plot(selectStrongest(scenePoints, 300));
+
+% selectStrongest detects strongest 300 points from the image. 
+
+
+
+[boxFeatures, clockPoints] = extractFeatures(a, clockPoints);
+[sceneFeatures, scenePoints] = extractFeatures(b, scenePoints);
+
+% above lines extracts the features in the image and stores in the matrix.
+
+
+boxPairs = matchFeatures(boxFeatures, sceneFeatures);
+
+% matches the pairs of matrix.
+
+
+matchedBoxPoints = clockPoints(boxPairs(:, 1), :);
+matchedScenePoints = scenePoints(boxPairs(:, 2), :);
+figure;
+showMatchedFeatures(a, b, matchedBoxPoints, ...
+    matchedScenePoints, 'montage');
+title('Putatively Matched Points (Including Outliers)');
+
+
+
+[tform, inlierBoxPoints, inlierScenePoints] = ...
+    estimateGeometricTransform(matchedBoxPoints, matchedScenePoints, 'affine');
+
+
+
+figure;
+showMatchedFeatures(a, b, inlierBoxPoints, ...
+    inlierScenePoints, 'montage');
+title('Matched Points (Inliers Only)');
+
+
+
+boxPolygon = [1, 1;...                           % top-left
+        size(a, 2), 1;...                 % top-right
+        size(a, 2), size(a, 1);... % bottom-right
+        1, size(a, 1);...                 % bottom-left
+        1, 1];                   % top-left again to close the polygon
+    
+    
+    
+    
+    
+    
+    newBoxPolygon = transformPointsForward(tform, boxPolygon);
+    
+    
+   
+figure;
+imshow(b);
+hold on;
+line(newBoxPolygon(:, 1), newBoxPolygon(:, 2), 'Color', 'y');
+% above code makes a colored box around the clock.  
+title('Detected Clock');
+
+
+
+% Understand SURF: https://medium.com/data-breach/introduction-to-surf-speeded-up-robust-features-c7396d6e7c4e
+
+
+
+
+
+
+
+
+
+
+
