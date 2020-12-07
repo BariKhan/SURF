@@ -1,2 +1,2 @@
 # SURF
-using SURF to detect and match image features
+Using Speeded Up Robust Features (SURF) to detect and match image features.
